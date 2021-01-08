@@ -7,6 +7,7 @@ const passport = require('passport')
 const passportLocalMongoose = require('passport-local-mongoose')
 const bodyParser = require('body-parser')
 const findOrCreate = require('mongoose-findorcreate')
+const bycrypt = require('bcrypt')
 
 
 const app = express();
@@ -47,38 +48,110 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 
+//  BYCRYPT METHOD
+
 
 app.post('/register', (req, res) => {
-    const { username, cellnumber, FirstGuardian, FGuardianNo, SecondGuardian, SecondGuardianNo, Message } = req.body
-    User.register({
-        username: username,
-        cellnumber: cellnumber,
-        FirstGuardian: FirstGuardian,
-        FGuardianNo: FGuardianNo,
-        SecondGuardian: SecondGuardian,
-        SecondGuardianNo: SecondGuardianNo,
-        Message: Message
-    }, req.body.password, function (err, user) {
-        if (err) {
-            console.log(err);
-            res.send(err)
+
+    const { username, cellnumber, FirstGuardian, FGuardianNo, SecondGuardian, SecondGuardianNo, Message, password } = req.body
+    User.findOne({ username: username }, function (err, foundUser) {
+        if (foundUser) {
+            res.json({ "message": "User Already Exist" })
         } else {
-            passport.authenticate("local")(req, res, function () {
-                res.send("Successfully")
-            });
+            bycrypt.hash(password, 10, function (err, has) {
+
+                const user = new User({
+                    email: username,
+                    username: username,
+                    password: has,
+                    cellnumber: cellnumber,
+                    FirstGuardian: FirstGuardian,
+                    FGuardianNo: FGuardianNo,
+                    SecondGuardian: SecondGuardian,
+                    SecondGuardianNo: SecondGuardianNo,
+                    Message: Message
+                })
+                user.save((err) => {
+                    if (err) {
+                        res.send(err)
+                    } else {
+                        res.send('Saved Successfully')
+                    }
+                })
+            })
         }
-    });
-})
-app.get('/logout', (req, res) => {
-    req.logout();
-    res.redirect('/')
-})
-app.post('/login', (req, res) => {
-    const user = new User({
-        username: req.body.username,
-        password: req.body.password
     })
 
+
+
 })
+
+
+// BCRYPT METHOD
+
+app.post('/login', (req, res) => {
+    const { username, cellnumber, FirstGuardian, FGuardianNo, SecondGuardian, SecondGuardianNo, Message, password } = req.body
+
+
+    console.log(username, password)
+    User.findOne({ username: username }, function (err, foundUser) {
+        if (foundUser) {
+            bycrypt.compare(password, foundUser.password, function (err, result) {
+                if (result === true) {
+                    res.send(foundUser)
+                } else {
+                    res.json({ "message": "User Not Found" })
+                }
+            })
+        }
+    }
+    )
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// app.post('/register', (req, res) => {
+//     const { username, cellnumber, FirstGuardian, FGuardianNo, SecondGuardian, SecondGuardianNo, Message } = req.body
+//     User.register({
+//         username: username,
+//         cellnumber: cellnumber,
+//         FirstGuardian: FirstGuardian,
+//         FGuardianNo: FGuardianNo,
+//         SecondGuardian: SecondGuardian,
+//         SecondGuardianNo: SecondGuardianNo,
+//         Message: Message
+//     }, req.body.password, function (err, user) {
+//         if (err) {
+//             console.log(err);
+//             res.send(err)
+//         } else {
+//             passport.authenticate("local")(req, res, function () {
+//                 res.send("Successfully")
+//             });
+//         }
+//     });
+// })
+// app.get('/logout', (req, res) => {
+//     req.logout();
+//     res.redirect('/')
+// })
+// app.post('/login', (req, res) => {
+//     const user = new User({
+//         username: req.body.username,
+//         password: req.body.password
+//     })
+
+// })
 
 app.listen(3000, console.log('app is running on port 3000'))
