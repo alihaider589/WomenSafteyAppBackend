@@ -1,17 +1,26 @@
+//jshint esversion:6
+require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
+const session = require('express-session')
+const passport = require('passport')
 const passportLocalMongoose = require('passport-local-mongoose')
 const bodyParser = require('body-parser')
-const md5 = require('md5')
-
 const findOrCreate = require('mongoose-findorcreate')
+const bycrypt = require('bcrypt')
 
-const app = express()
+
+const app = express();
+
 
 app.use(bodyParser.urlencoded({ extended: true }))
-mongoose.connect('mongodb://localhost:27017/wosafeDB', { useUnifiedTopology: true, useNewUrlParser: true })
+mongoose.connect('mongodb+srv://alihaider589:dzpiNbTBFrhrmSeH@cluster0.rskys.mongodb.net/woSafeDB',
+    { useUnifiedTopology: true, useNewUrlParser: true }
+)
+mongoose.set('useCreateIndex', true)
 
-const userSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
+    password: String,
     username: String,
     cellnumber: String,
     FirstGuardian: String,
@@ -19,52 +28,69 @@ const userSchema = new mongoose.Schema({
     SecondGuardian: String,
     SecondGuardianNo: Number,
     Message: String,
-    Password: String,
+
 })
 
-userSchema.plugin(passportLocalMongoose)
-userSchema.plugin(findOrCreate)
-
-const User = new mongoose.model('Lady', userSchema)
+const User = new mongoose.model('User', UserSchema)
 
 
-app.post('/register', (req, res) => {
-    const {username}= req.body
-    console.log(username)
+app.post('/api/wosafe/register', (req, res) => {
+
+    const { username, cellnumber, FirstGuardian, FGuardianNo, SecondGuardian, SecondGuardianNo, Message, password } = req.body
     User.findOne({ username: username }, function (err, foundUser) {
         if (foundUser) {
-            res.send(foundUser)
-            console.log(foundUser)
-        }else{
-           res.send('user not found')
+            res.json({ "message": "User Already Exist" })
+        } else {
+            bycrypt.hash(password, 10, function (err, has) {
+
+                const user = new User({
+                    email: username,
+                    username: username,
+                    password: has,
+                    cellnumber: cellnumber,
+                    FirstGuardian: FirstGuardian,
+                    FGuardianNo: FGuardianNo,
+                    SecondGuardian: SecondGuardian,
+                    SecondGuardianNo: SecondGuardianNo,
+                    Message: Message
+                })
+                user.save((err) => {
+                    if (err) {
+                        res.json(err)
+                    } else {
+                        res.json({ "message": "Saved Successfully" })
+                    }
+                })
+            })
         }
     })
+
+
+
 })
 
-app.post('/login', (req, res) => {
 
+// BCRYPT METHOD
+
+app.post('/api/wosafe/login', (req, res) => {
+    const { username, cellnumber, FirstGuardian, FGuardianNo, SecondGuardian, SecondGuardianNo, Message, password } = req.body
+
+
+    console.log(username, password)
+    User.findOne({ username: username }, function (err, foundUser) {
+        if (foundUser) {
+            bycrypt.compare(password, foundUser.password, function (err, result) {
+                if (result === true) {
+                    res.send(foundUser)
+                } else {
+                    res.json({ "message": "User Not Found" })
+                }
+            })
+        } else {
+            res.json({ "message": "User Not Found" })
+        }
+    }
+    )
 })
 
-
-
-
-app.listen(3000, console.log('app is running on port 3000'))
-
-
-// const NewUser = new User({
-//     username: req.body.username,
-//     cellnumber: req.body.cellnumber,
-//     FirstGuardian: req.body.FirstGuardian,
-//     FGuardianNo: req.body.FGuardianNo,
-//     SecondGuardian: req.body.SecondGuardian,
-//     SecondGuardianNo: req.body.SecondGuardianNo,
-//     Message: req.body.Message,
-//     Password: req.body.Password
-// })
-// NewUser.save((err) => {
-//     if (!err) {
-//         res.send('Saved Successfully')
-//     } else {
-//         res.send('Failed')
-//     }
-// })
+app.listen(process.env.PORT || 3000,, console.log('app is running on port 3000'))
