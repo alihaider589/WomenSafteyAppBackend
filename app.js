@@ -92,5 +92,18 @@ app.post('/api/wosafe/login', (req, res) => {
     }
     )
 })
+app.patch('/api/wosafe/update', (req, res) => {
+    const id = req.body._id
+    const username = req.body.username
 
-app.listen(process.env.PORT || 3000,console.log('app is running on port 3000'))
+    User.findOneAndUpdate({ _id: id }, { username: username }, (err) => {
+        if (!err) {
+            res.json({ "message": "Successfully changed Profile" })
+        } else {
+            res.json({ "message": "Failed to update Data" })
+        }
+    })
+})
+
+
+app.listen(process.env.PORT || 3000, console.log('app is running on port 3000'))
