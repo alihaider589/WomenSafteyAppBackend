@@ -93,10 +93,24 @@ app.post('/api/wosafe/login', (req, res) => {
     )
 })
 app.patch('/api/wosafe/update', (req, res) => {
-    const id = req.body._id
-    const username = req.body.username
-
-    User.findOneAndUpdate({ _id: id }, { username: username }, (err) => {
+    const { id,
+        username,
+        cellnumber,
+        FirstGuardian,
+        SecondGuardian,
+        FGuardianNo,
+        SecondGuardian,
+        SecondGuardianNo,
+        Message } = req.body
+    User.findOneAndUpdate({ _id: id }, {
+        username: username,
+        cellnumber: cellnumber,
+        FirstGuardian: FirstGuardian,
+        FGuardianNo: FGuardianNo,
+        SecondGuardian: SecondGuardian,
+        SecondGuardianNo: SecondGuardianNo,
+        Message: Message
+    }, (err) => {
         if (!err) {
             res.json({ "message": "Successfully changed Profile" })
         } else {
