@@ -93,15 +93,15 @@ app.post('/api/wosafe/login', (req, res) => {
     )
 })
 app.patch('/api/wosafe/update', (req, res) => {
-    const { id,
-        username,
-        cellnumber,
-        FirstGuardian,
-        SecondGuardian,
-        FGuardianNo,
-        SecondGuardian,
-        SecondGuardianNo,
-        Message } = req.body
+    const id = req.body._id
+    const username = req.body.username
+    const cellnumber = req.body.cellnumber
+    const FirstGuardian = req.body.FirstGuardian
+    const FGuardianNo = req.body.FGuardianNo
+    const SecondGuardian = req.body.SecondGuardian
+    const SecondGuardianNo = req.body.SecondGuardianNo
+    const Message = req.body.Message
+
     User.findOneAndUpdate({ _id: id }, {
         username: username,
         cellnumber: cellnumber,
