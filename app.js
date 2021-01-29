@@ -83,8 +83,8 @@ app.post('/api/wosafe/login', (req, res) => {
         if (foundUser) {
             bycrypt.compare(password, foundUser.password, function (err, result) {
                 if (result === true) {
-                    res.send(foundUser)
-                    res.json({"message":"user Found"})
+                    res.json({"data":foundUser,"message":"User Found"})
+                  
                 } else {
                     res.json({ "message": "User Not Found" })
                 }
