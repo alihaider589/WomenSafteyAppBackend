@@ -8,6 +8,8 @@ const passportLocalMongoose = require('passport-local-mongoose')
 const bodyParser = require('body-parser')
 const findOrCreate = require('mongoose-findorcreate')
 const bycrypt = require('bcrypt')
+const twilio = require('twilio');
+
 
 
 const app = express();
@@ -82,6 +84,7 @@ app.post('/api/wosafe/login', (req, res) => {
             bycrypt.compare(password, foundUser.password, function (err, result) {
                 if (result === true) {
                     res.send(foundUser)
+                    res.json({"message":"user Found"})
                 } else {
                     res.json({ "message": "User Not Found" })
                 }
@@ -118,6 +121,44 @@ app.patch('/api/wosafe/update', (req, res) => {
         }
     })
 })
+
+
+
+
+
+
+
+app.get('/test', (req, res) => {
+    var accountSid = 'AC12a2af7030d4bb0e868df36642a3eec6'; // Your Account SID from www.twilio.com/console
+    var authToken = '28ab5d1149cbf3ae2c8d83baae450f46';   // Your Auth Token from www.twilio.com/console
+
+
+    var client = new twilio(accountSid, authToken);
+
+    client.messages.create({
+        body: 'Hello from Node',
+        to: '+923152929915',  // Text this number
+        from: '+12345678901' // From a valid Twilio number
+    })
+        .then((message) => console.log(message.sid));
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 app.listen(process.env.PORT || 3000, console.log('app is running on port 3000'))
