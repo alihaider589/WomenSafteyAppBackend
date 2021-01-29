@@ -128,21 +128,21 @@ app.patch('/api/wosafe/update', (req, res) => {
 
 
 
-app.get('/test', (req, res) => {
-    var accountSid = 'AC12a2af7030d4bb0e868df36642a3eec6'; // Your Account SID from www.twilio.com/console
-    var authToken = '28ab5d1149cbf3ae2c8d83baae450f46';   // Your Auth Token from www.twilio.com/console
-
-
-    var client = new twilio(accountSid, authToken);
-
-    client.messages.create({
-        body: 'Hello from Node',
-        to: '+923152929915',  // Text this number
-        from: '+12345678901' // From a valid Twilio number
-    })
-        .then((message) => console.log(message.sid));
-
-})
+// app.get('/test', (req, res) => {
+//     var accountSid = 'AC12a2af7030d4bb0e868df36642a3eec6'; // Your Account SID from www.twilio.com/console
+//     var authToken = '28ab5d1149cbf3ae2c8d83baae450f46';   // Your Auth Token from www.twilio.com/console
+//
+//
+//     var client = new twilio(accountSid, authToken);
+//
+//     client.messages.create({
+//         body: 'Hello from Node',
+//         to: '+923152929915',  // Text this number
+//         from: '+12345678901' // From a valid Twilio number
+//     })
+//         .then((message) => console.log(message.sid));
+//
+// })
 
 
 
